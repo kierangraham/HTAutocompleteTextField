@@ -36,7 +36,7 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
 - (void)awakeFromNib
 {
     [super awakeFromNib];
-    
+
     [self setupAutocompleteTextField];
 }
 
@@ -51,13 +51,13 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
     self.autocompleteLabel.font = self.font;
     self.autocompleteLabel.backgroundColor = [UIColor clearColor];
     self.autocompleteLabel.textColor = [UIColor lightGrayColor];
-    
+
 #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000
     NSLineBreakMode lineBreakMode = NSLineBreakByClipping;
 #else
     UILineBreakMode lineBreakMode = UILineBreakModeClip;
 #endif
-    
+
     self.autocompleteLabel.lineBreakMode = lineBreakMode;
     self.autocompleteLabel.hidden = YES;
     [self addSubview:self.autocompleteLabel];
@@ -71,9 +71,9 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
     [self bringSubviewToFront:self.autocompleteButton];
 
     self.autocompleteString = @"";
-    
+
     self.ignoreCase = YES;
-    
+
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ht_textDidChange:) name:UITextFieldTextDidChangeNotification object:self];
 }
 
@@ -109,22 +109,22 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
         {
             self.autocompleteLabel.text = @"";
         }
-        
+
         self.autocompleteLabel.hidden = NO;
     }
-    
+
     return [super becomeFirstResponder];
 }
 
 - (BOOL)resignFirstResponder
 {
-    if (!self.autocompleteDisabled)
+    if (!self.autocompleteDisabled && self.showAutocompleteButton == NO)
     {
         self.autocompleteLabel.hidden = YES;
 
         if ([self commitAutocompleteText]) {
             // Only notify if committing autocomplete actually changed the text.
-        
+
 
             // This is necessary because committing the autocomplete text changes the text field's text, but for some reason UITextField doesn't post the UITextFieldTextDidChangeNotification notification on its own
             [[NSNotificationCenter defaultCenter] postNotificationName:UITextFieldTextDidChangeNotification
@@ -140,26 +140,26 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
 {
     CGRect returnRect = CGRectZero;
     CGRect textRect = [self textRectForBounds:self.bounds];
-    
+
 #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000
     NSLineBreakMode lineBreakMode = NSLineBreakByCharWrapping;
 #else
     UILineBreakMode lineBreakMode = UILineBreakModeCharacterWrap;
 #endif
-    
+
     CGSize prefixTextSize = [self.text sizeWithFont:self.font
                                   constrainedToSize:textRect.size
                                       lineBreakMode:lineBreakMode];
-    
+
     CGSize autocompleteTextSize = [self.autocompleteString sizeWithFont:self.font
                                                       constrainedToSize:CGSizeMake(textRect.size.width-prefixTextSize.width, textRect.size.height)
                                                           lineBreakMode:lineBreakMode];
-    
+
     returnRect = CGRectMake(textRect.origin.x + prefixTextSize.width + self.autocompleteTextOffset.x,
                             textRect.origin.y + self.autocompleteTextOffset.y,
                             autocompleteTextSize.width,
                             textRect.size.height);
-    
+
     return returnRect;
 }
 
@@ -180,7 +180,7 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
     if (!self.autocompleteDisabled)
     {
         id <HTAutocompleteDataSource> dataSource = nil;
-        
+
         if ([self.autocompleteDataSource respondsToSelector:@selector(textField:completionForPrefix:ignoreCase:)])
         {
             dataSource = (id <HTAutocompleteDataSource>)self.autocompleteDataSource;
@@ -189,7 +189,7 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
         {
             dataSource = DefaultAutocompleteDataSource;
         }
-        
+
         if (dataSource)
         {
             self.autocompleteString = [dataSource textField:self completionForPrefix:self.text ignoreCase:self.ignoreCase];
@@ -201,7 +201,7 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
                     [self updateAutocompleteButtonAnimated:YES];
                 }
             }
-            
+
             [self updateAutocompleteLabel];
         }
     }
@@ -214,7 +214,7 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
         && self.autocompleteDisabled == NO)
     {
         self.text = [NSString stringWithFormat:@"%@%@", self.text, self.autocompleteString];
-        
+
         self.autocompleteString = @"";
         [self updateAutocompleteLabel];
     }
@@ -281,7 +281,7 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
         // copy/paste popup first
         [self bringSubviewToFront:self.autocompleteButton];
     };
-    
+
     if (animated)
     {
         [UIView animateWithDuration:0.15f animations:^{
