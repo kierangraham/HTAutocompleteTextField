@@ -118,11 +118,11 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
 
 - (BOOL)resignFirstResponder
 {
-    if (!self.autocompleteDisabled && self.showAutocompleteButton == NO)
+    if (!self.autocompleteDisabled)
     {
         self.autocompleteLabel.hidden = YES;
 
-        if ([self commitAutocompleteText]) {
+        if (self.showAutocompleteButton == NO && [self commitAutocompleteText]) {
             // Only notify if committing autocomplete actually changed the text.
 
 
